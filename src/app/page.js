@@ -52,46 +52,53 @@ export default function Home() {
   };
 
   useEffect(() => {
-useEffect(() => {
-  const RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const TOUCH = window.matchMedia("(hover:none), (pointer:coarse)").matches;
+    const RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const lenis = new Lenis({
+      duration: 1.35,
+      easing: (x) => Math.min(1, 1.001 - Math.pow(2, -10 * x)),
+      smoothWheel: true
+    });
+    lenisRef.current = lenis;
+    lenis.on('scroll', ScrollTrigger.update);
 
-  // منع قفزات الموبايل وإلغاء تأثير تغيير حجم شريط العنوان على الـ Pin
-  ScrollTrigger.config({ ignoreMobileResize: true });
-  if (TOUCH) {
-    ScrollTrigger.normalizeScroll(true);
-  }
+    const SCROLL_LEN = window.innerWidth < 768 ? 9000 : 12000;
+    const DUR = 130;
+    const T = (p) => p * DUR;
 
-  const lenis = new Lenis({
+    const state = { p: 0 };
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: ".experience",
+        start: "top top",
+        end: `+=${SCROLL_LEN}`,
+        scrub: RM ? 0.4 : 1.2,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+onUpdate: (self) => {
+  progressRef.current = self.progress;const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TOUCH = window.matchMedia('(hover:none), (pointer:coarse)').matches;
+const MOBILE = window.innerWidth < 768;
+const LOW_FX = MOBILE || TOUCH || RM;
+
+let lenis = null;
+
+if (!RM && !TOUCH) {
+  lenis = new Lenis({
     duration: 1.35,
     easing: (x) => Math.min(1, 1.001 - Math.pow(2, -10 * x)),
     smoothWheel: true
   });
+
   lenisRef.current = lenis;
   lenis.on('scroll', ScrollTrigger.update);
-
-  const SCROLL_LEN = window.innerWidth < 768 ? 9000 : 12000;
-  const DUR = 130;
-  const T = (p) => p * DUR;
-
-  const state = { p: 0 };
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: ".experience",
-      start: "top top",
-      end: `+=${SCROLL_LEN}`,
-      scrub: RM ? 0.4 : 1.2,
-      pin: true,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => {
-        const p = self.progress;
-        progressRef.current = p;
-        setCurrentScene(p < 0.2 ? 0 : p < 0.45 ? 1 : p < 0.65 ? 2 : p < 0.82 ? 3 : 4);
-        updateAudio(p, performance.now() / 1000);
+}
+  const p = self.progress;
+  setCurrentScene(p < 0.2 ? 0 : p < 0.45 ? 1 : p < 0.65 ? 2 : p < 0.82 ? 3 : 4);
+  updateAudio(p, performance.now() / 1000);
+}
       }
-    }
-  });
+    });
 
     tl.to(state, { p: 1, duration: DUR, ease: "none" }, 0);
 
@@ -156,6 +163,8 @@ const handleLoaded = () => {
       {!loaded && <Loader onLoaded={handleLoaded} />}
       <CustomCursor mousePosRef={mousePosRef} />
 
+
+
       <div className="experience">
         <div className="stage" id="stage">
           <ExperienceCanvas progressRef={progressRef} mousePosRef={mousePosRef} lookRef={lookRef} />
@@ -175,7 +184,6 @@ const handleLoaded = () => {
             onToggleSound={toggleSound}
             onHomeClick={handleResetScroll}
           />
-          {loaded && <ScrollIndicator currentScene={currentScene} />}
 
           <DepthMeter currentScene={currentScene} progress={progressRef.current} />
           <RailNavigation currentScene={currentScene} progress={progressRef.current} onScrollTo={handleScrollTo} />
@@ -186,7 +194,7 @@ const handleLoaded = () => {
           </div>
         </div>
       </div>
-
+{loaded && <ScrollIndicator currentScene={currentScene} />}
       <MenuModal isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
       <BookModal isOpen={bookOpen} onClose={() => setBookOpen(false)} />
     </main>
