@@ -14,8 +14,11 @@ import Captions from '../components/Captions';
 import FinalReveal from '../components/FinalReveal';
 import MenuModal from '../components/modals/MenuModal';
 import BookModal from '../components/modals/BookModal';
+
+
 import { useAudioEngine } from '../hooks/useAudioEngine';
-import ScrollIndicator from "@/components/ScrollIndicator";
+
+
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
@@ -194,7 +197,6 @@ const handleLoaded = () => {
           </div>
         </div>
       </div>
-{loaded && <ScrollIndicator currentScene={currentScene} />}
       <MenuModal isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
       <BookModal isOpen={bookOpen} onClose={() => setBookOpen(false)} />
     </main>
