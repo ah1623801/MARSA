@@ -23,7 +23,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [bookOpen, setBookOpen] = useState(false);
   const [currentScene, setCurrentScene] = useState(0);
-
+const sceneRef = useRef(0);
   const progressRef = useRef(0);
   const mousePosRef = useRef({ x: 0, y: 0 });
   const lookRef = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
@@ -76,12 +76,23 @@ export default function Home() {
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          progressRef.current = self.progress;
-          const p = self.progress;
-          setCurrentScene(p < 0.2 ? 0 : p < 0.45 ? 1 : p < 0.65 ? 2 : p < 0.82 ? 3 : 4);
-          updateAudio(p, performance.now() / 1000);
-        }
+ onUpdate: (self) => {
+  progressRef.current = self.progress;
+  const p = self.progress;
+
+  const nextScene =
+    p < 0.2 ? 0 :
+    p < 0.45 ? 1 :
+    p < 0.65 ? 2 :
+    p < 0.82 ? 3 : 4;
+
+  if (nextScene !== sceneRef.current) {
+    sceneRef.current = nextScene;
+    setCurrentScene(nextScene);
+  }
+
+  updateAudio(p, performance.now() / 1000);
+}
       }
     });
 
