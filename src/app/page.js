@@ -23,7 +23,6 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [bookOpen, setBookOpen] = useState(false);
   const [currentScene, setCurrentScene] = useState(0);
-const sceneRef = useRef(0);
   const progressRef = useRef(0);
   const mousePosRef = useRef({ x: 0, y: 0 });
   const lookRef = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
@@ -76,21 +75,26 @@ const sceneRef = useRef(0);
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
- onUpdate: (self) => {
-  progressRef.current = self.progress;
+onUpdate: (self) => {
+  progressRef.current = self.progress;const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TOUCH = window.matchMedia('(hover:none), (pointer:coarse)').matches;
+const MOBILE = window.innerWidth < 768;
+const LOW_FX = MOBILE || TOUCH || RM;
+
+let lenis = null;
+
+if (!RM && !TOUCH) {
+  lenis = new Lenis({
+    duration: 1.35,
+    easing: (x) => Math.min(1, 1.001 - Math.pow(2, -10 * x)),
+    smoothWheel: true
+  });
+
+  lenisRef.current = lenis;
+  lenis.on('scroll', ScrollTrigger.update);
+}
   const p = self.progress;
-
-  const nextScene =
-    p < 0.2 ? 0 :
-    p < 0.45 ? 1 :
-    p < 0.65 ? 2 :
-    p < 0.82 ? 3 : 4;
-
-  if (nextScene !== sceneRef.current) {
-    sceneRef.current = nextScene;
-    setCurrentScene(nextScene);
-  }
-
+  setCurrentScene(p < 0.2 ? 0 : p < 0.45 ? 1 : p < 0.65 ? 2 : p < 0.82 ? 3 : 4);
   updateAudio(p, performance.now() / 1000);
 }
       }
